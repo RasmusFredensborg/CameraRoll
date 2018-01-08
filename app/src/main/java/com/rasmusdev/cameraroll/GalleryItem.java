@@ -1,7 +1,7 @@
 package com.rasmusdev.cameraroll;
 
 public class GalleryItem {
-    private String path;
+    private String path; 
 
     public GalleryItem(String path) {
         this.path = path;
