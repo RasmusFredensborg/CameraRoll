@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">CameraRoll</string>
     <string name="preview">Preview</string>
+    <string name="title_activity_image_details">ImageDetails</string>
 </resources>
