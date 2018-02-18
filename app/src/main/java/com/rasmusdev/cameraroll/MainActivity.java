@@ -1,9 +1,14 @@
 package com.rasmusdev.cameraroll;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -11,13 +16,16 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
 
-public class MainActivity extends AppCompatActivity implements OnTaskCompleted {
+public class MainActivity extends AppCompatActivity implements OnTaskCompleted, GalleryRecyclerViewAdapter.OnGalleryItemClickListener {
 
     private RecyclerView mRecyclerView;
     private GalleryRecyclerViewAdapter mAdapter;
@@ -41,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements OnTaskCompleted {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // specify an adapter (see also next example)
-        mAdapter = new GalleryRecyclerViewAdapter(this);
+        mAdapter = new GalleryRecyclerViewAdapter(this, this);
         mRecyclerView.setAdapter(mAdapter);
 
         /// Animation
@@ -142,5 +150,16 @@ public class MainActivity extends AppCompatActivity implements OnTaskCompleted {
         if (observer != null) {
             observer.unregister(this);
         }
+    }
+
+    @Override
+    public void onItemClick(int position, GalleryItem item, ImageView sharedImageView) {
+        Intent intent = new Intent(this, ImageDetails.class);
+
+        intent.putExtra("IMAGE_CLICKED", item.getPath());
+        ActivityOptionsCompat options = ActivityOptionsCompat.
+                makeSceneTransitionAnimation(this, sharedImageView, "details");
+
+        startActivity(intent, options.toBundle());
     }
 }

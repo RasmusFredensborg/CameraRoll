@@ -1,6 +1,7 @@
 package com.rasmusdev.cameraroll;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,10 +17,12 @@ import java.util.ArrayList;
 
 public class GalleryRecyclerViewAdapter extends RecyclerView.Adapter<GalleryRecyclerViewAdapter.ViewHolder> {
     private static final String TAG = "GalleryRecyclerView";
+    private final OnGalleryItemClickListener listener;
 
     private ArrayList<GalleryItem> mDataSet;
     private Context mContext;
     private int lastPosition = -1;
+
 
     @Override
     public void onViewDetachedFromWindow(ViewHolder holder) {
@@ -31,20 +34,18 @@ public class GalleryRecyclerViewAdapter extends RecyclerView.Adapter<GalleryRecy
         this.mDataSet = dataSet;
     }
 
+    public interface OnGalleryItemClickListener {
+        void onItemClick(int position, GalleryItem item, ImageView sharedImageView);
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private View rootView;
 
-        ViewHolder(View v) {
-            super(v);
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Element " + getAdapterPosition() + " clicked.");
-                }
-            });
-            rootView = v.getRootView();
-            imageView = v.findViewById(R.id.image);
+        ViewHolder(View itemView) {
+            super(itemView);
+            rootView = itemView.getRootView();
+            imageView = itemView.findViewById(R.id.grid_image);
         }
 
         void clearAnimation()
@@ -52,14 +53,25 @@ public class GalleryRecyclerViewAdapter extends RecyclerView.Adapter<GalleryRecy
             rootView.clearAnimation();
         }
 
-        ImageView getImageView() {
-            return imageView;
+        void bind(final int position, final GalleryItem item, final ImageView sharedImageView, final OnGalleryItemClickListener listener) {
+            Glide.with(itemView.getContext())
+                    .load(item.getPath())
+                    .asBitmap()
+                    .into(imageView);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+
+                    listener.onItemClick(position, item, sharedImageView);
+                }
+            });
         }
     }
 
-    GalleryRecyclerViewAdapter(Context context) {
+    GalleryRecyclerViewAdapter(Context context, OnGalleryItemClickListener listener) {
         mContext = context;
         mDataSet = new ArrayList<>();
+        this.listener = listener;
     }
 
     private void setAnimation(View viewToAnimate, int position) {
@@ -83,10 +95,8 @@ public class GalleryRecyclerViewAdapter extends RecyclerView.Adapter<GalleryRecy
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        Glide.with(mContext)
-                .load(mDataSet.get(position).getPath())
-                .asBitmap()
-                .into(viewHolder.getImageView());
+
+        viewHolder.bind(position, mDataSet.get(position), viewHolder.imageView, this.listener);
 //        setAnimation(viewHolder.getImageView(), position);
     }
 
